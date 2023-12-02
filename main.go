@@ -1,17 +1,32 @@
 package main
 
 import (
-	_ "fmt"
-	"github.com/gorilla/mux"
+	"database/sql"
+	"log"
 	"net/http"
-	"registration/handlers"
+
+	"fashion/services"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
 )
 
+var db *sql.DB
+
 func main() {
-	r := mux.NewRouter()
+	dataSourceName := "root:root@tcp(localhost:3306)/fashion_db"
+	var err error
+	db, err = sql.Open("mysql", dataSourceName)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
 
-	r.HandleFunc("/register", handlers.RegisterUserHandler).Methods("POST")
+	router := mux.NewRouter()
 
-	http.Handle("/", r)
-	http.ListenAndServe(":8080", nil)
+	router.HandleFunc("/users", services.CreateUserHandler).Methods("POST")
+	router.HandleFunc("/users/{id}", services.GetUserByIDHandler).Methods("GET")
+	router.HandleFunc("/users/{id}", services.UpdateUserHandler).Methods("PUT")
+	router.HandleFunc("/users/{id}", services.DeleteUserHandler).Methods("DELETE")
+
+	log.Fatal(http.ListenAndServe(":8080", router))
 }
