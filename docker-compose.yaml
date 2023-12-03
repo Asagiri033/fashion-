@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'fashion_db'
+      MYSQL_USER: 'root'
+      MYSQL_PASSWORD: 'root'
+      MYSQL_ROOT_PASSWORD: 'root'
+    ports:
+      - "3307:3306"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: localhost
+      DB_PORT: 3306
+      DB_USER: 'root'
+      DB_PASSWORD: 'root'
+      DB_NAME: 'fashion_db'
+
+volumes:
+  db_data:
